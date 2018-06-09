@@ -1,0 +1,30 @@
+version: '3.2'
+
+services:
+      
+  celery:
+    build:
+      context: ./
+      dockerfile: celery.Dockerfile
+    command:
+      python3 -u pusher.py
+    links:
+      - rabbitmq
+      
+  worker:
+    build:
+      context: ./
+      dockerfile: celery.Dockerfile
+    command:
+      celery -A tasks worker -b amqp://rooty:passy@rabbitmq// --loglevel=info 
+    links:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3
+    restart: always
+    ports:
+      - 5762:5762
+    environment:
+      RABBITMQ_DEFAULT_USER: rooty
+      RABBITMQ_DEFAULT_PASS: passy
